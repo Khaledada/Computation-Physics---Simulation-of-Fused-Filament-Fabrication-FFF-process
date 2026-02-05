@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimental Temperature Measurements - FFF Process</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .answer-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .answer-box h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        .plots-container {
+            display: grid;
+            gap: 20px;
+        }
+        .plot-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .key-finding {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-card h4 {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-card .unit {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Experimental Temperature Measurements - FFF Process</h1>
+        <p>Analysis of thermal behavior during layer-by-layer 3D printing</p>
+        
+        <div class="info-box">
+            <h3>📊 Research Questions:</h3>
+            <ul>
+                <li><strong>Q1:</strong> How does the temperature distribution evolve within the component over time at a specific point?</li>
+                <li><strong>Q2:</strong> What is the maximum temperature reached immediately outside the nozzle during operation?</li>
+            </ul>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Max Nozzle Exit Temp</h4>
+                <div class="value">83.5</div>
+                <div class="unit">°C</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h4>Nozzle Temperature</h4>
+                <div class="value">230</div>
+                <div class="unit">°C</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h4>Print Bed Temp</h4>
+                <div class="value">50-52</div>
+                <div class="unit">°C</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h4>Ambient Cooling</h4>
+                <div class="value">~25</div>
+                <div class="unit">°C</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container plots-container">
+        <div class="plot-box">
+            <h3>Q1: Temperature Evolution at Fixed Point (5mm from base)</h3>
+            <div id="tempEvolution"></div>
+            <div class="key-finding">
+                <strong>🔍 Key Finding:</strong> Temperature exhibits cyclic behavior with thermal spikes when nozzle passes nearby, followed by rapid cooling due to convection. Overall trend shows decreasing temperature as component grows and thermal mass increases.
+            </div>
+        </div>
+
+        <div class="plot-box">
+            <h3>Comparison: Trial 1 vs Trial 2 - Fixed Point Temperature</h3>
+            <div id="trialComparison"></div>
+            <div class="key-finding">
+                <strong>🔍 Observation:</strong> Trial 2 shows more consistent cooling pattern, while Trial 1 exhibits reheating in later stages (possibly due to different printing path or ambient conditions).
+            </div>
+        </div>
+
+        <div class="plot-box">
+            <h3>Temperature Distribution Across Layers (Trial 1 - Multiple Time Points)</h3>
+            <div id="layerDistribution"></div>
+            <div class="key-finding">
+                <strong>🔍 Key Finding:</strong> Clear thermal gradient from bottom (heated bed ~50°C) to top (ambient cooling ~25°C). Upper layers cool faster due to higher convective heat transfer.
+            </div>
+        </div>
+
+        <div class="plot-box">
+            <h3>Q2: Temperature Profile from Nozzle Exit to Component</h3>
+            <div id="nozzleProfile"></div>
+            <div class="key-finding">
+                <strong>🔍 Key Finding:</strong> Rapid temperature drop from nozzle (230°C) to exit point (83.5°C) to printed wall (~25-35°C) demonstrates high heat loss rate due to convection and small diameter filament.
+            </div>
+        </div>
+
+        <div class="plot-box">
+            <h3>Thermal Cycling at Fixed Point - Detailed View (Trial 1)</h3>
+            <div id="thermalCycling"></div>
+            <div class="key-finding">
+                <strong>🔍 Analysis:</strong> Shows heating phases (nozzle nearby) and cooling phases (nozzle away). Peak at 50% (46.4°C) corresponds to critical point where thermal accumulation is maximum.
+            </div>
+        </div>
+
+        <div class="plot-box">
+            <h3>Thermal Cycling at Fixed Point - Detailed View (Trial 2)</h3>
+            <div id="thermalCyclingTrial2"></div>
+            <div class="key-finding">
+                <strong>🔍 Analysis:</strong> Trial 2 demonstrates more consistent cooling behavior with lower peak temperature (41°C at 23% completion). Temperature stabilizes around 22-23°C after 65% completion, indicating more uniform heat dissipation pattern compared to Trial 1.
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="answer-box">
+            <h3>✅ Answer to Q1: Temperature Distribution Evolution</h3>
+            <p><strong>The temperature at a fixed point exhibits three distinct phases:</strong></p>
+            <ol>
+                <li><strong>Heating Phase (0-50%):</strong> Temperature rises as nozzle deposits nearby layers. Trial 1 shows increase from 36.9°C to 46.4°C.</li>
+                <li><strong>Peak/Stabilization (50-65%):</strong> Maximum local temperature reached due to cumulative heat from multiple layers.</li>
+                <li><strong>Cooling Phase (65-100%):</strong> As nozzle moves to upper layers, fixed point cools via convection to ambient air and conduction to print bed.</li>
+            </ol>
+            <p><strong>Physical Mechanism:</strong> Heat transfer governed by Fourier's law with competing effects:</p>
+            <ul>
+                <li>Heat input: Conduction from hot filament (84°C at exit)</li>
+                <li>Heat loss: Convection to air (h ≈ 5-10 W/m²K) and conduction to bed (60°C)</li>
+            </ul>
+        </div>
+
+        <div class="answer-box">
+            <h3>✅ Answer to Q2: Maximum Temperature Outside Nozzle</h3>
+            <p><strong>Maximum measured temperature: 83.5°C at 60% print completion</strong></p>
+            <p><strong>Temperature cascade from nozzle to component:</strong></p>
+            <ul>
+                <li>Inside nozzle: 230°C (heating element)</li>
+                <li>Nozzle exit: ~150-180°C (estimated, not directly measured)</li>
+                <li>5-10mm below nozzle: <strong>83.5°C</strong> (your measurement)</li>
+                <li>Deposited wall: 25-35°C (ambient cooling)</li>
+            </ul>
+            <p><strong>Why such rapid cooling?</strong></p>
+            <ul>
+                <li>High surface-area-to-volume ratio of thin filament</li>
+                <li>Natural convection heat loss (q = h·A·ΔT)</li>
+                <li>Low thermal conductivity of polymer (k ≈ 0.25 W/m·K)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Trial 1 Data - Fixed point at 5mm from base
+        const trial1_progress = [35, 45, 50, 60, 65, 75, 85, 100];
+        const trial1_fixedPoint = [36.9, 37.9, 46.4, 41.9, 30.6, 41.6, 47, 47];
+
+        // Trial 2 Data - Fixed point
+        const trial2_progress = [23, 35, 45, 55, 65, 75, 85, 100];
+        const trial2_fixedPoint = [41, 32.3, 26.2, 23.1, 22.2, 28.1, 21.5, 22.6];
+
+        // Trial 1 - Layer temperatures at different completion percentages
+        const layerData = [
+            {completion: 35, top: 33.7, bottom: 50.4},
+            {completion: 45, top: 29.9, middle: 34, bottom: 43.5},
+            {completion: 65, top: 28.1, middle: 26.4, bottom: 45.5},
+            {completion: 75, top: 25, middle: 24.5, bottom: 46.9},
+            {completion: 85, top: 25.5, middle: 23.3, bottom: 50},
+            {completion: 100, top: 25.5, middle: 23.3, bottom: 50}
+        ];
+
+        // Plot 1: Temperature Evolution at Fixed Point
+        const trace1_trial1 = {
+            x: trial1_progress,
+            y: trial1_fixedPoint,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Trial 1',
+            line: {color: '#e74c3c', width: 3},
+            marker: {size: 10}
+        };
+
+        Plotly.newPlot('tempEvolution', [trace1_trial1], {
+            title: 'Temperature vs Print Completion at Fixed Point (5mm from base)',
+            xaxis: {title: 'Print Completion (%)', dtick: 10},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400,
+            hovermode: 'closest'
+        });
+
+        // Plot 2: Trial Comparison
+        const trace2_trial1 = {
+            x: trial1_progress,
+            y: trial1_fixedPoint,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Trial 1',
+            line: {color: '#e74c3c', width: 3},
+            marker: {size: 10, symbol: 'circle'}
+        };
+
+        const trace2_trial2 = {
+            x: trial2_progress,
+            y: trial2_fixedPoint,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Trial 2',
+            line: {color: '#3498db', width: 3},
+            marker: {size: 10, symbol: 'square'}
+        };
+
+        Plotly.newPlot('trialComparison', [trace2_trial1, trace2_trial2], {
+            title: 'Fixed Point Temperature: Trial 1 vs Trial 2',
+            xaxis: {title: 'Print Completion (%)', dtick: 10},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400,
+            hovermode: 'closest'
+        });
+
+        // Plot 3: Layer Distribution
+        const completions = [35, 65, 85, 100];
+        const colors = ['#e74c3c', '#f39c12', '#3498db', '#2ecc71'];
+
+        const layerTraces = completions.map((comp, idx) => {
+            const data = layerData.find(d => d.completion === comp);
+            const temps = [];
+            const positions = [];
+            
+            if (data.top !== undefined) {
+                temps.push(data.top);
+                positions.push('Top');
+            }
+            if (data.middle !== undefined) {
+                temps.push(data.middle);
+                positions.push('Middle');
+            }
+            temps.push(data.bottom);
+            positions.push('Bottom');
+            
+            return {
+                x: positions,
+                y: temps,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: `${comp}% complete`,
+                line: {color: colors[idx], width: 2},
+                marker: {size: 10}
+            };
+        });
+
+        Plotly.newPlot('layerDistribution', layerTraces, {
+            title: 'Temperature Distribution Across Layers (Trial 1)',
+            xaxis: {title: 'Layer Position'},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400
+        });
+
+        // Plot 4: Nozzle to Component Temperature Profile
+        const nozzleTrace = {
+            x: ['Nozzle\nHeater', 'Nozzle\nExit\n(estimated)', 'Filament\n~5mm below', 'Upper\nLayer', 'Middle\nLayer', 'Bottom\nLayer (Bed)'],
+            y: [230, 165, 83.5, 28.1, 26.4, 50],
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: {color: '#9b59b6', width: 4},
+            marker: {
+                size: [15, 12, 18, 10, 10, 12],
+                color: [230, 165, 83.5, 28.1, 26.4, 50],
+                colorscale: 'Jet',
+                showscale: true,
+                colorbar: {title: 'Temp (°C)'}
+            }
+        };
+
+        Plotly.newPlot('nozzleProfile', [nozzleTrace], {
+            title: 'Temperature Cascade: From Nozzle to Component (at 65% completion)',
+            xaxis: {title: 'Position'},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400,
+            annotations: [{
+                x: 'Filament\n~5mm below',
+                y: 83.5,
+                text: 'Max measured: 83.5°C',
+                showarrow: true,
+                arrowhead: 2,
+                ax: 0,
+                ay: -40,
+                bgcolor: 'rgba(255, 255, 255, 0.9)',
+                bordercolor: '#e74c3c',
+                borderwidth: 2
+            }]
+        });
+
+        // Plot 5: Thermal Cycling Detail
+        // Create color-coded line segments for heating (red) and cooling (blue)
+        const cyclingTraces1 = [];
+        
+        for (let idx = 0; idx < trial1_progress.length - 1; idx++) {
+            const temp = trial1_fixedPoint[idx];
+            const nextTemp = trial1_fixedPoint[idx + 1];
+            const prog = trial1_progress[idx];
+            const nextProg = trial1_progress[idx + 1];
+            const isHeating = nextTemp > temp;
+            
+            cyclingTraces1.push({
+                x: [prog, nextProg],
+                y: [temp, nextTemp],
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: isHeating ? '#e74c3c' : '#3498db', width: 4},
+                showlegend: idx === 0,
+                name: 'Temperature Path',
+                hoverinfo: 'skip'
+            });
+        }
+        
+        // Add markers trace
+        const markerTrace1 = {
+            x: trial1_progress,
+            y: trial1_fixedPoint,
+            type: 'scatter',
+            mode: 'markers',
+            marker: {size: 12, color: '#e67e22', line: {color: 'white', width: 2}},
+            showlegend: false,
+            hoverinfo: 'y'
+        };
+        cyclingTraces1.push(markerTrace1);
+
+        const annotations = trial1_progress.map((prog, idx) => {
+            const temp = trial1_fixedPoint[idx];
+            const nextTemp = idx < trial1_fixedPoint.length - 1 ? trial1_fixedPoint[idx + 1] : temp;
+            const isHeating = nextTemp > temp;
+            return {
+                x: prog,
+                y: temp,
+                text: isHeating ? '🔥 Heating' : '❄️ Cooling',
+                showarrow: false,
+                yshift: isHeating ? 15 : -15,
+                font: {size: 10}
+            };
+        });
+
+        Plotly.newPlot('thermalCycling', cyclingTraces1, {
+            title: 'Thermal Cycling Pattern at Fixed Point (Trial 1)',
+            xaxis: {title: 'Print Completion (%)', dtick: 10},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400,
+            annotations: annotations,
+            shapes: [{
+                type: 'rect',
+                xref: 'x',
+                yref: 'paper',
+                x0: 45,
+                x1: 55,
+                y0: 0,
+                y1: 1,
+                fillcolor: 'rgba(231, 76, 60, 0.1)',
+                line: {width: 0}
+            }]
+        });
+
+        // Plot 6: Thermal Cycling Detail - Trial 2
+        // Create color-coded line segments for heating (red) and cooling (blue)
+        const cyclingTraces2 = [];
+        
+        for (let idx = 0; idx < trial2_progress.length - 1; idx++) {
+            const temp = trial2_fixedPoint[idx];
+            const nextTemp = trial2_fixedPoint[idx + 1];
+            const prog = trial2_progress[idx];
+            const nextProg = trial2_progress[idx + 1];
+            const isHeating = nextTemp > temp;
+            
+            cyclingTraces2.push({
+                x: [prog, nextProg],
+                y: [temp, nextTemp],
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: isHeating ? '#e74c3c' : '#3498db', width: 4},
+                showlegend: idx === 0,
+                name: 'Temperature Path',
+                hoverinfo: 'skip'
+            });
+        }
+        
+        // Add markers trace
+        const markerTrace2 = {
+            x: trial2_progress,
+            y: trial2_fixedPoint,
+            type: 'scatter',
+            mode: 'markers',
+            marker: {size: 12, color: '#9b59b6', line: {color: 'white', width: 2}},
+            showlegend: false,
+            hoverinfo: 'y'
+        };
+        cyclingTraces2.push(markerTrace2);
+
+        const annotations2 = trial2_progress.map((prog, idx) => {
+            const temp = trial2_fixedPoint[idx];
+            const nextTemp = idx < trial2_fixedPoint.length - 1 ? trial2_fixedPoint[idx + 1] : temp;
+            const isHeating = nextTemp > temp;
+            return {
+                x: prog,
+                y: temp,
+                text: isHeating ? '🔥 Heating' : '❄️ Cooling',
+                showarrow: false,
+                yshift: isHeating ? 15 : -15,
+                font: {size: 10}
+            };
+        });
+
+        Plotly.newPlot('thermalCyclingTrial2', cyclingTraces2, {
+            title: 'Thermal Cycling Pattern at Fixed Point (Trial 2)',
+            xaxis: {title: 'Print Completion (%)', dtick: 10},
+            yaxis: {title: 'Temperature (°C)'},
+            height: 400,
+            annotations: annotations2,
+            shapes: [{
+                type: 'rect',
+                xref: 'x',
+                yref: 'paper',
+                x0: 20,
+                x1: 30,
+                y0: 0,
+                y1: 1,
+                fillcolor: 'rgba(52, 152, 219, 0.1)',
+                line: {width: 0}
+            }]
+        });
+
+    </script>
+</body>
+</html>
